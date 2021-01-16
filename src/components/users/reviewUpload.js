@@ -22,7 +22,7 @@ const ReviewUpload = ({setModalOpen, token, userId, upload, selectUser}) => {
             }
         }
 
-        axios.post(`${URL}/admin/updateupload`, { userId, uploadId: upload._id, ...form }, config)
+        axios.post(`${URL}/admin/updateupload`, { userId, iduploads: upload.iduploads, ...form }, config)
             .then((res) => {
                 if (res.status === 200) {
                     selectUser(userId);
@@ -50,13 +50,13 @@ const ReviewUpload = ({setModalOpen, token, userId, upload, selectUser}) => {
 
         let _fix = upload.s3key.split('/');
 
-        axios.get(`${URL}/admin/download/${upload.originalName}?prefix=${_fix[0]}&suffix=${_fix[1]}`, config)
+        axios.get(`${URL}/admin/download/${upload.originalname}?prefix=${_fix[0]}&suffix=${_fix[1]}`, config)
             .then((res) => {
                 console.log(res);
-                let url = window.URL.createObjectURL(new Blob([res.data], { type: upload.mimeType }));
+                let url = window.URL.createObjectURL(new Blob([res.data], { type: upload.mimetype }));
                 let link = document.createElement('a');
                 link.href = url;
-                link.download = upload.originalName;
+                link.download = upload.originalname;
                 link.click();
                 setEnableDownload(true);
             })
@@ -89,7 +89,7 @@ const ReviewUpload = ({setModalOpen, token, userId, upload, selectUser}) => {
                                 <button onClick={download} className="btn btn-info">Download File</button> :
                                 <span className="fas fa-spinner fa-pulse fa-3x text-info"></span>
                         }
-                        <p className="font-weight-bold">{upload.originalName}</p>
+                        <p className="font-weight-bold">{upload.originalname}</p>
                     </div>
                 </div>
                 <div className="col-lg-8 col-md-10 col-sm-12 mt-4 px-5 py-5 border border-info rounded">

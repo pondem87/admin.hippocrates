@@ -12,7 +12,7 @@ function App() {
     <div>
       <BrowserRouter>
         <MainNav />
-        <div className="container">
+        <div className="container mb-3">
           <Switch>
             <ProtectedRoute exact path='/' component={Home} />
             <Route path="/signin" component={SignIn} />

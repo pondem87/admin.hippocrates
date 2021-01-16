@@ -8,10 +8,9 @@ const UserContextProvider = (props) => {
         signedIn: false,
     });
 
-    const login = (user, token) => {
+    const login = (data) => {
         setState({
-            user,
-            token,
+            ...data,
             signedIn: true
         })
     }

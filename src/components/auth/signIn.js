@@ -7,7 +7,7 @@ import Loader from '../shared/loader'
 const SignIn = () => {
     const { login } = useContext(UserContext);
     const [state, setState] = useState({
-        username: '',
+        email: '',
         password: '',
         error: ''
     })
@@ -29,9 +29,9 @@ const SignIn = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        loginFunc(login, setState, done, {username: state.username, password: state.password});
+        loginFunc(login, setState, done, {email: state.email, password: state.password});
         setState({
-            username: '',
+            email: '',
             password: '',
             error: ''
         })
@@ -53,7 +53,7 @@ const SignIn = () => {
                         <p className="error-message">{state.error}</p>
                         <div className="form-group">
                             <label htmlFor="username">Username</label>
-                            <input className="form-control" type='text' id='username' onChange={handleChange} value={state.email} required />
+                            <input className="form-control" type='text' id='email' onChange={handleChange} value={state.email} required />
                         </div>
                         <div className="form-group">
                             <label>Password</label>

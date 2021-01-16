@@ -16,15 +16,15 @@ const UsersList = ({rows, selectUser}) => {
                 {
                     rows && rows.map((row, index) => {
                         return (
-                            <tr key={row._id}>
+                            <tr key={row.iduser}>
                                 <th scope="row">{ index+1 }</th>
                                 <td><span className="text-capitalize">{row.surname}, {row.forenames}</span></td>
-                                <td>{row.accountType}</td>
+                                <td>{row.account_type}</td>
                                 <td>
-                                    Identity: {row.verification.identityVerified ? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>}<br />
-                                    Profession: {row.accountType === 'PROFESSIONAL' ? (row.verification.professionVerified? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>) : 'N/A'}
+                                    Identity: {row.identity_verified ? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>}<br />
+                                    Profession: {row.account_type === 'PROFESSIONAL' ? (row.profession_verified? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>) : 'N/A'}
                                 </td>
-                                <td><button onClick={() => selectUser(row._id)} className="btn btn-info">View Details</button></td>
+                                <td><button onClick={() => selectUser(row.iduser)} className="btn btn-info">View Details</button></td>
                             </tr>
                         )
                     })

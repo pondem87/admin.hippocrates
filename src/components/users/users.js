@@ -6,7 +6,7 @@ import UsersList from './usersList';
 import UserDetails from './userDetails';
 
 const Users = () => {
-    const {user, token} = useContext(UserContext);
+    const user = useContext(UserContext);
     const [usersList, setUsersList] = useState([]);
     const [pages, setPages] = useState({ init: false, page: 1, limit: 20, prev: false, next: false})
     const [selectedUser, setSelectedUser] = useState(null);
@@ -45,17 +45,17 @@ const Users = () => {
 
         const config = {
             headers: {
-                'authorization': 'bearer ' + token
+                'authorization': 'bearer ' + user.token
             }
         }
 
         axios.get(`${URL}/admin/fetchusers${queryString}`, config)
             .then(res => {
-                setUsersList(res.data);
+                setUsersList(res.data.users);
                 setPages((prev) => ({
                     ...prev,
                     page,
-                    next: !(res.data.length < limit),
+                    next: !(res.data.users.length < limit),
                     prev: page > 1,
                     init: true
                 }))
@@ -76,26 +76,24 @@ const Users = () => {
     }
 
     const selectUser = (userId) => {
-        console.log('selected user id: ', userId);
-
-        let queryString = '?id=' + userId;
+        let queryString = '?iduser=' + userId;
 
         const config = {
             headers: {
-                'authorization': 'bearer ' + token
+                'authorization': 'bearer ' + user.token
             }
         }
 
         axios.get(`${URL}/admin/fetchuser${queryString}`, config)
             .then(res => {
-                if (!res.data.error) {
-                    setSelectedUser({...res.data})
+                if (res.data.user) {
+                    setSelectedUser(res.data.user)
                 } else {
-                    console.log(res.data.error)
+                    alert(res.data.error)
                 }
             })
             .catch(error => {
-                console.log(error)
+                alert(error)
             })
     }
 
@@ -104,7 +102,7 @@ const Users = () => {
     }
 
     return (
-        selectedUser ? <UserDetails token={token} user={selectedUser} selectUser={selectUser} deselectUser={deselectUser} /> :
+        selectedUser ? <UserDetails token={user.token} user={selectedUser} selectUser={selectUser} deselectUser={deselectUser} /> :
         <div>
             <div className="row">
                 <div className="col-12 py-3 my-1 text-center text-muted">

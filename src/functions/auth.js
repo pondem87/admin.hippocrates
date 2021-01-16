@@ -7,9 +7,8 @@ export const loginFunc = (login, setErrorState, done, values) => {
         .then((res) => {
             if (res.data.token) {
                 //login successful
-                console.log('User:', res.data);
                 localStorage.setItem('jwt', res.data.token);
-                login(res.data._doc, res.data.token);
+                login(res.data);
                 done();
             } else if (res.data.error) {
                 //failed to login

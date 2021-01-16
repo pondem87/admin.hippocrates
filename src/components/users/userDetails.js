@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import ReviewUpload from './reviewUpload';
 import AddCertificate from './addCertificate';
@@ -12,13 +12,33 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
     const [upload, setUpload] = useState(null);
     const [verifyingIdentity, setVerifyingIdentity] = useState(false);
     const [verifyingProfession, setVerifyingProfession] = useState(false);
+    const [uploads, setUploads] = useState([]);
+    const [certificates, setCertificates] = useState([]);
 
-    const enableCerts = user.accountType === 'PROFESSIONAL' ? true : false;
+    const enableCerts = user.account_type === 'PROFESSIONAL' ? true : false;
 
     const axiosConfig = {
         headers: {
             'authorization': 'bearer ' + token
         }
+    }
+
+    useEffect(() => {
+        getUploads();
+    }, [])
+
+    const getUploads = () => {
+        axios.get(`${URL}/admin/getuploads?iduser=${user.iduser}`, axiosConfig)
+            .then((res) => {
+                if (res.data.uploads) {
+                    setUploads(res.data.uploads);
+                } else if (res.data.error) {
+                    alert('Failed to get uploads: ' + res.data.error.message);
+                }
+            })
+            .catch(error => {
+                alert('Failed to get uploads: Network Error');
+            })
     }
     
     const deleteCertificate = (certificationId) => {
@@ -77,7 +97,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
             <Modal appElement={document.getElementById('modal')} isOpen={modalOpen}>
                 {
                     modalPurpose === 'REVIEW_UPLOAD' ?
-                        <ReviewUpload setModalOpen={setModalOpen} token={token} userId={user._id} upload={upload} selectUser={selectUser} /> :
+                        <ReviewUpload setModalOpen={setModalOpen} token={token} userId={user.iduser} upload={upload} selectUser={selectUser} /> :
                         modalPurpose === 'ADD_CERT' ?
                             <AddCertificate setModalOpen={setModalOpen} token={token} selectUser={selectUser} user={user} /> :
                             <div className="row justify-content-center text-center py-4 px-4 mt-5">
@@ -102,9 +122,9 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                     <ul className="list-group list-group-flush">
                         <li className="list-group-item text-capitalize">Surname: {user.surname}</li>
                         <li className="list-group-item text-capitalize">Forenames: {user.forenames}</li>
-                        <li className="list-group-item">Account Type: {user.accountType}</li>
-                        <li className="list-group-item text-capitalize">Gender: {user.age}</li>
-                        <li className="list-group-item text-capitalize">Age: {user.birthday && user.birthday.toString()}</li>
+                        <li className="list-group-item">Account Type: {user.account_type}</li>
+                        <li className="list-group-item text-capitalize">Gender: {user.gender}</li>
+                        <li className="list-group-item text-capitalize">Age: {user.birthday && new Date(user.birthday).toDateString()}</li>
                         <li className="list-group-item">Email: {user.email}</li>
                         <li className="list-group-item">Phone: {user.phone}</li>
                         <li className="list-group-item">Address: {user.address}</li>
@@ -114,9 +134,9 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                     <h4>Uploads</h4>
                     <ul className="list-group list-group-flush">
                         {
-                            user.uploads.map((item, index) => {
+                            uploads && uploads.map((item, index) => {
                                 return (
-                                    <li key={item._id} className="list-group-item">
+                                    <li key={item.iduploads} className="list-group-item">
                                         <button
                                             onClick={() => {
                                                 setUpload(item);
@@ -125,10 +145,10 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                                             }}
                                             className="btn btn-info float-right">Review Now</button>
                                         <span className="font-weight-bold">{index + 1} </span>
-                                        {item.originalName}<br />
+                                        {item.originalname}<br />
                                         Reviewed: { item.reviewed ? <span className="text-success font-weight-bold">YES</span>: <span className="text-danger font-weight-bold">NO</span>}
                                         { item.reviewed ?
-                                            <span>, Accepted: { item.readOnly ? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>} </span> :
+                                            <span>, Accepted: { item.readonly ? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>} </span> :
                                             <span />
                                         }
                                     </li>
@@ -139,23 +159,15 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                     <h4 className="mt-4">Certificates</h4>
                     <ul className="list-group list-group-flush">
                         {
-                            user.certification && user.certification.map((item) => {
+                            certificates && certificates.map((item) => {
                                 return (
-                                    <li key={item._id} className="list-group-item">
+                                    <li key={item.idcertificates} className="list-group-item">
                                         <button
-                                                onClick={() => deleteCertificate(item._id) }
+                                                onClick={() => deleteCertificate(item.idcertificates) }
                                                 className="btn btn-danger float-right">Delete</button>
                                         {item.certification}<br />
-                                        Issued by {item.certifyingBody} on {moment(item.date).format("Mo MMM YYYY")}<br />
-                                        Document: {
-                                            user.uploads.filter((item1) => {
-                                                return (item1.s3key === item.document)
-                                            }).map((item2) => {
-                                                return (
-                                                    <span key={item2._id}>{item2.originalName}</span>
-                                                )
-                                            })
-                                        }
+                                        Issued by {item.certifying_body} on {moment(item.issue_date).format("Mo MMM YYYY")}<br />
+                                        Document: {item.originalname}
                                     </li>
                                 )
                             })
@@ -184,7 +196,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                                 verifyingProfession ?
                                 <span className="fas fa-spinner fa-pulse fa-3x text-info float-right"></span>:
                                 <button
-                                    disabled={!(user.certification.length > 0)}
+                                    disabled={true}
                                     onClick={verifyProfession}
                                     className="btn btn-info float-right">Verify Profession</button>
                             }
