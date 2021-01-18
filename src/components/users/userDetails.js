@@ -58,7 +58,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
 
     const verifyIdentity = () => {
         setVerifyingIdentity(true);
-        axios.post(`${URL}/admin/verifyidentity`, { userId: user._id }, axiosConfig)
+        axios.post(`${URL}/admin/verifyidentity`, { idverification: user.idverification }, axiosConfig)
             .then((res) => {
                 if (res.data.success) {
                     alert('Verification was sucessful!');
@@ -97,7 +97,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
             <Modal appElement={document.getElementById('modal')} isOpen={modalOpen}>
                 {
                     modalPurpose === 'REVIEW_UPLOAD' ?
-                        <ReviewUpload setModalOpen={setModalOpen} token={token} userId={user.iduser} upload={upload} selectUser={selectUser} /> :
+                        <ReviewUpload setModalOpen={setModalOpen} token={token} upload={upload} getUploads={getUploads} /> :
                         modalPurpose === 'ADD_CERT' ?
                             <AddCertificate setModalOpen={setModalOpen} token={token} selectUser={selectUser} user={user} /> :
                             <div className="row justify-content-center text-center py-4 px-4 mt-5">

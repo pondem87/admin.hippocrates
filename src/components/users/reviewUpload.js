@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { URL } from '../../variables';
 
-const ReviewUpload = ({setModalOpen, token, userId, upload, selectUser}) => {
+const ReviewUpload = ({setModalOpen, token, upload, getUploads}) => {
     const [enableDownload, setEnableDownload] = useState(true);
     const [form, setForm] = useState({
             comments: '',
@@ -22,13 +22,13 @@ const ReviewUpload = ({setModalOpen, token, userId, upload, selectUser}) => {
             }
         }
 
-        axios.post(`${URL}/admin/updateupload`, { userId, iduploads: upload.iduploads, ...form }, config)
+        axios.post(`${URL}/admin/updateupload`, { iduploads: upload.iduploads, ...form }, config)
             .then((res) => {
                 if (res.status === 200) {
-                    selectUser(userId);
+                    getUploads();
                     setModalOpen(false);
                 } else {
-                    setError('Failed to upadate upload: status ', res.status);
+                    setError('Failed to update upload status: ', res.status);
                     setSubmitting(false);
                 }
             })
