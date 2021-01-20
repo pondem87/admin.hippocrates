@@ -25,6 +25,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
 
     useEffect(() => {
         getUploads();
+        getCertificates();
     }, [])
 
     const getUploads = () => {
@@ -40,13 +41,27 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                 alert('Failed to get uploads: Network Error');
             })
     }
+
+    const getCertificates = () => {
+        axios.get(`${URL}/admin/getcertificates?iduser=${user.iduser}`, axiosConfig)
+            .then((res) => {
+                if (res.data.certificates) {
+                    setCertificates(res.data.certificates);
+                } else if (res.data.error) {
+                    alert('Failed to get certificates: ' + res.data.error.message);
+                }
+            })
+            .catch(error => {
+                alert('Failed to get certofocates: Network Error');
+            })
+    }
     
-    const deleteCertificate = (certificationId) => {
-        axios.post(`${URL}/admin/deletecertification`, { userId: user._id, certificationId }, axiosConfig)
+    const deleteCertificate = (idcertificates) => {
+        axios.post(`${URL}/admin/deletecertification`, { iduser: user.iduser, idcertificates }, axiosConfig)
             .then((res) => {
                 if (res.data.success) {
                     alert('Deletion was sucessful!');
-                    selectUser(user._id);
+                    getCertificates();
                 } else if (res.data.error) {
                     alert('Deletion failed: ' + res.data.error.message);
                 }
@@ -58,36 +73,43 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
 
     const verifyIdentity = () => {
         setVerifyingIdentity(true);
-        axios.post(`${URL}/admin/verifyidentity`, { idverification: user.idverification }, axiosConfig)
+        axios.post(`${URL}/admin/verifyidentity`, { idverification: user.idverification, state: user.identity_verified }, axiosConfig)
             .then((res) => {
                 if (res.data.success) {
-                    alert('Verification was sucessful!');
+                    alert(res.data.success.message);
                     setVerifyingIdentity(false);
+                    selectUser(user.iduser);
                 } else if (res.data.error) {
-                    alert('Verification failed: ' + res.data.error.message);
+                    alert('Update verification failed: ' + res.data.error.message);
                     setVerifyingIdentity(false);
                 }
             })
             .catch(error => {
-                alert('Verification failed: Network Error');
+                alert('Update verification failed: Network Error');
                 setVerifyingIdentity(false);
             })
     }
 
     const verifyProfession = () => {
+        if (!user.identity_verified) {
+            alert("Identity should be verified first")
+            return
+        }
+
         setVerifyingProfession(true);
-        axios.post(`${URL}/admin/verifyprofession`, { userId: user._id }, axiosConfig)
+        axios.post(`${URL}/admin/verifyprofession`, { idverification: user.idverification, state: user.profession_verified }, axiosConfig)
             .then((res) => {
                 if (res.data.success) {
-                    alert('Verification was sucessful!');
-                    setVerifyingProfession(false);
+                    alert(res.data.success.message);
+                    selectUser(user.iduser);
                 } else if (res.data.error) {
-                    alert('Verification failed: ' + res.data.error.message);
-                    setVerifyingProfession(false);
+                    alert('Updating profession verification failed: ' + res.data.error.message);
                 }
             })
             .catch(error => {
-                alert('Verification failed: Network Error');
+                alert('Updating profession verification failed: Network Error');
+            })
+            .then(() => {
                 setVerifyingProfession(false);
             })
     }
@@ -99,7 +121,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                     modalPurpose === 'REVIEW_UPLOAD' ?
                         <ReviewUpload setModalOpen={setModalOpen} token={token} upload={upload} getUploads={getUploads} /> :
                         modalPurpose === 'ADD_CERT' ?
-                            <AddCertificate setModalOpen={setModalOpen} token={token} selectUser={selectUser} user={user} /> :
+                            <AddCertificate setModalOpen={setModalOpen} token={token} getCertificates={getCertificates} user={user} /> :
                             <div className="row justify-content-center text-center py-4 px-4 mt-5">
                                 <div className="col-10">
                                     <h5>No content to show</h5>
@@ -183,24 +205,53 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                             {
                                 verifyingIdentity ?
                                 <span className="fas fa-spinner fa-pulse fa-3x text-info float-right"></span>:
-                                <button
-                                    onClick={verifyIdentity}
-                                    className="btn btn-info float-right">Verify Identity</button>
-
+                                <span>
+                                    {
+                                        user.identity_verified ? 
+                                            <button
+                                                onClick={verifyIdentity}
+                                                className="btn btn-danger float-right">Cancel verification</button>
+                                            :
+                                            <button
+                                                onClick={verifyIdentity}
+                                                className="btn btn-info float-right">Verify identity</button>
+                                    }
+                                </span>
+                                
                             }
                             
-                            If you have reviewed and accepted an identity document
+                            { 
+                                user.identity_verified ?
+                                "If you want to revoke identity verification click this button" :
+                                "If you have reviewed and accepted an identity document, click to verify user's identity"
+                            }
                         </li>
                         <li className="list-group-item">
                             {
                                 verifyingProfession ?
                                 <span className="fas fa-spinner fa-pulse fa-3x text-info float-right"></span>:
-                                <button
-                                    disabled={true}
-                                    onClick={verifyProfession}
-                                    className="btn btn-info float-right">Verify Profession</button>
+                                <span>
+                                    {
+                                        user.profession_verified ?
+                                            <button
+                                                disabled={false}
+                                                onClick={verifyProfession}
+                                                className="btn btn-danger float-right">Cancel Profession Verification</button>
+                                            :
+                                            <button
+                                                disabled={!certificates.length}
+                                                onClick={verifyProfession}
+                                                className="btn btn-info float-right">Verify Profession</button>
+                                    }
+                                </span>
+                               
                             }
-                            If you have reviewed a Certificate/Licence and added one below
+                            
+                            { 
+                                user.identity_verified ?
+                                "If you want to revoke profession verification click this button" :
+                                "If you have reviewed a Certificate/Licence and added one below then click to verify"
+                            }
                         </li>
                         <li className="list-group-item">
                             <button

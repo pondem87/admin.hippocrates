@@ -1,33 +1,60 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { URL } from '../../variables';
 
-const AddCertificate = ({setModalOpen, token, selectUser, user}) => {
+const AddCertificate = ({setModalOpen, token, getCertificates, user}) => {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
     const [form, setForm] = useState({
             certification: '',
-            certifyingBody: '',
-            identifyingNumber: '',
-            date: '',
-            document: user.uploads[0].s3key || ''
+            certifying_body: '',
+            certificate_num: '',
+            issue_date: '',
+            iduploads: ''
         });
+
+    const [uploads, setUploads] = useState([]);
+    
+    const axiosConfig = {
+        headers: {
+            'authorization': 'bearer ' + token
+        }
+    }
+
+    useEffect(() => {
+        getUploads();
+    }, [])
+
+    const getUploads = () => {
+        axios.get(`${URL}/admin/getuploads?iduser=${user.iduser}`, axiosConfig)
+            .then((res) => {
+                if (res.data.uploads) {
+                    setUploads(res.data.uploads);
+                    //select first upload as default on select box
+                    if (res.data.uploads.length > 1) setForm(prev => ({ ...prev, iduploads: res.data.uploads[0].iduploads }));
+                } else if (res.data.error) {
+                    alert('Failed to get uploads: ' + res.data.error.message);
+                }
+            })
+            .catch(error => {
+                alert('Failed to get uploads: Network Error');
+            })
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setSubmitting(true);
-        console.log('SUBMIT: ', form);
-
-        const axiosConfig = {
-            headers: {
-                'authorization': 'bearer ' + token
-            }
+        
+        if (form.iduploads === '') {
+            alert("Please select a supporting document");
+            return;
         }
 
-        axios.post(`${URL}/admin/addcertification`, { userId: user._id, ...form }, axiosConfig)
+        setSubmitting(true);
+
+        axios.post(`${URL}/admin/addcertification`, { iduser: user.iduser, ...form }, axiosConfig)
             .then((res) => {
                 if (res.data.success) {
-                    selectUser(user._id);
+                    getCertificates();
                     setModalOpen(false);
                 } else if (res.data.error) {
                     setError(res.data.error.message);
@@ -65,24 +92,24 @@ const AddCertificate = ({setModalOpen, token, selectUser, user}) => {
                             <input className="form-control" type="text" id='certification' onChange={handleChange} value={form.certification} required/>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="certifyingBody">Certifying Body</label>
-                            <input className="form-control" type="text" id='certifyingBody' onChange={handleChange} value={form.certifyingBody} required/>
+                            <label htmlFor="certifying_body">Certifying Body</label>
+                            <input className="form-control" type="text" id='certifying_body' onChange={handleChange} value={form.certifying_body} required/>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="identifyingNumber">Certificate Number</label>
-                            <input className="form-control" type="text" id='identifyingNumber' onChange={handleChange} value={form.identifyingNumber} required/>
+                            <label htmlFor="certificate_num">Certificate Number</label>
+                            <input className="form-control" type="text" id='certificate_num' onChange={handleChange} value={form.certificate_num} required/>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="date">Date Of Issue</label>
-                            <input className="form-control" type="date" id='date' onChange={handleChange} value={form.date} required/>
+                            <label htmlFor="issue_date">Date Of Issue</label>
+                            <input className="form-control" type="date" id='issue_date' onChange={handleChange} value={form.issue_date} required/>
                         </div>
                         <div className="form-group">
-                            <label htmlFor="document">Supporting Document</label>
-                            <select className="form-control" id="document" onChange={handleChange} value={form.document}>
+                            <label htmlFor="iduploads">Supporting Document</label>
+                            <select className="form-control" id="iduploads" onChange={handleChange} value={form.iduploads}>
                                 {
-                                    user.uploads && user.uploads.map((item) => {
+                                    uploads && uploads.map((item) => {
                                         return (
-                                            <option key={item._id} value={item.s3key}>{item.originalName}</option>
+                                            <option key={item.iduploads} value={item.iduploads}>{item.originalname}</option>
                                         )
                                     })
                                 }
