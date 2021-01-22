@@ -2,11 +2,13 @@ import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../context/userContext';
 import axios from 'axios';
 import { URL } from '../../variables';
+import Loader from '../shared/loader';
 
 const Home = () => {
     const user = useContext(UserContext);
     const [admins, setAdmins] = useState([]);
     const [submitting, setSubmitting] = useState(false);
+    const [creatingUser, setCreatingUser] = useState(false);
     const [form, setForm] = useState({
         email: '',
         surname: '',
@@ -30,6 +32,7 @@ const Home = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setCreatingUser(true);
 
         axios.post(`${URL}/admin/create`, form, axiosConfig)
             .then((res) => {
@@ -50,6 +53,7 @@ const Home = () => {
                     surname: '',
                     forenames: ''
                 });
+                setCreatingUser(false);
                 getAdminsList();
             });
     }
@@ -130,31 +134,37 @@ const Home = () => {
                     </ul>
                 </div>
                 <div className="col-md-6 col-sm-10">
-                    <h4>Create Admin Account</h4>
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label htmlFor="username">Email</label>
-                            <input className="form-control" type="text" id='email' minLength={8} onChange={handleChange} value={form.email} required />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="surname">Surname</label>
-                            <input className="form-control" type="text" min="3" id='surname' onChange={handleChange} value={form.surname} required />
-                        </div>
-                        <div className="form-group">
-                            <label htmlFor="forenames">Forenames</label>
-                            <input className="form-control" type="text" min="3" id='forenames' onChange={handleChange} value={form.forenames} required />
-                        </div>
-                        <div className="text-center">
-                            <p>A password will be generated and sent to the email provided.</p>
-                        </div>
-                        <div className="text-center">
-                            {
-                                submitting ?
-                                    <span className="fas fa-spinner fa-pulse fa-3x text-info"></span> :
-                                    <input type='submit' className="btn btn-primary" value="Create Account" />
-                            }
-                        </div>
-                    </form>
+                    {
+                        creatingUser ?
+                            <Loader /> :
+                            <div>
+                                <h4>Create Admin Account</h4>
+                                <form onSubmit={handleSubmit}>
+                                    <div className="form-group">
+                                        <label htmlFor="username">Email</label>
+                                        <input className="form-control" type="text" id='email' minLength={8} onChange={handleChange} value={form.email} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="surname">Surname</label>
+                                        <input className="form-control" type="text" min="3" id='surname' onChange={handleChange} value={form.surname} required />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor="forenames">Forenames</label>
+                                        <input className="form-control" type="text" min="3" id='forenames' onChange={handleChange} value={form.forenames} required />
+                                    </div>
+                                    <div className="text-center">
+                                        <p>A password will be generated and sent to the email provided.</p>
+                                    </div>
+                                    <div className="text-center">
+                                        {
+                                            submitting ?
+                                                <span className="fas fa-spinner fa-pulse fa-3x text-info"></span> :
+                                                <input type='submit' className="btn btn-primary" value="Create Account" />
+                                        }
+                                    </div>
+                                </form>
+                            </div>
+                    }
                 </div>
             </div>  
         </div>

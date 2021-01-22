@@ -1,1 +1,1 @@
-export const URL = 'https://api.hippocratesalliance.com';
+export const URL = 'http://api.hippocratesalliance.com';

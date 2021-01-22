@@ -6,6 +6,7 @@ import ProtectedRoute from './components/shared/protectedRoute';
 import Home from './components/home/home';
 import MainFooter from './components/shared/mainFooter';
 import Users from './components/users/users';
+import Reset from './components/auth/reset';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Switch>
             <ProtectedRoute exact path='/' component={Home} />
             <Route path="/signin" component={SignIn} />
+            <Route path="/reset" component={Reset} />
             <ProtectedRoute path='/users' component={Users} />
             <ProtectedRoute component={Home} />
           </Switch>

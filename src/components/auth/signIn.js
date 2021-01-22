@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { UserContext } from '../../context/userContext';
 import { loginFunc } from '../../functions/auth';
-import Loader from '../shared/loader'
+import Loader from '../shared/loader';
 
 const SignIn = () => {
     const { login } = useContext(UserContext);
@@ -52,7 +52,7 @@ const SignIn = () => {
                     <form onSubmit={handleSubmit} className="border border-info rounded py-2 px-5">
                         <p className="error-message">{state.error}</p>
                         <div className="form-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="username">Email</label>
                             <input className="form-control" type='text' id='email' onChange={handleChange} value={state.email} required />
                         </div>
                         <div className="form-group">
@@ -66,6 +66,7 @@ const SignIn = () => {
                     </form>
                     <div className="my-2 text-center">
                         <p>Contact system admin for login credentials</p>
+                        <p><Link to="/reset">Reset Password</Link></p>
                     </div>
                 </div>
             </div>

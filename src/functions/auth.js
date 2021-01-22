@@ -30,3 +30,24 @@ export const loginFunc = (login, setErrorState, done, values) => {
             }))
         });
 }
+
+
+//reset password function
+export const ResetPasswordFunc = (email) => {
+    return new Promise((resolve, reject) => {
+        axios.post(`${URL}/admin/resetpassword`, {email})
+        .then((res) => {
+            if (res.data.success) {
+                resolve(res.data.success.message);
+            } else if (res.data.error) {
+                //failed to login
+                reject(res.data.error.message)
+            } else {
+                reject("Unknown error");
+            }
+        })
+        .catch((error) => {
+            reject('Network Error')
+        });
+    }) 
+}
