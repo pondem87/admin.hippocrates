@@ -145,6 +145,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                         <li className="list-group-item text-capitalize">Surname: {user.surname}</li>
                         <li className="list-group-item text-capitalize">Forenames: {user.forenames}</li>
                         <li className="list-group-item">Account Type: {user.account_type}</li>
+                        <li className="list-group-item text-capitalize">Profession: { user.profession ? user.profession : 'Not Available'}</li>
                         <li className="list-group-item text-capitalize">Gender: {user.gender}</li>
                         <li className="list-group-item text-capitalize">Age: {user.birthday && new Date(user.birthday).toDateString()}</li>
                         <li className="list-group-item">Email: {user.email}</li>
