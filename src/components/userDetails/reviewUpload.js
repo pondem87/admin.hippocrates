@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios from '../../functions/axios';
 import { URL } from '../../variables';
 
 const ReviewUpload = ({setModalOpen, token, upload, getUploads}) => {

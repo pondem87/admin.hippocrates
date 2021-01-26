@@ -2,11 +2,17 @@ import React, { useContext, useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import ReviewUpload from './reviewUpload';
 import AddCertificate from './addCertificate';
-import axios from 'axios';
+import axios from '../../functions/axios';
 import { URL } from '../../variables';
 import moment from 'moment';
+import { getUserById } from '../../functions/usersFunctions';
+import { UserContext } from '../../context/userContext';
+import Loader from '../../components/shared/loader';
+import AdminTasks from './adminTasks';
 
-const UserDetails = ({token, user, selectUser, deselectUser}) => {
+const UserDetails = (props) => {
+    const admin = useContext(UserContext);
+    const [user, setUser] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalPurpose, setModalPurpose] = useState('');
     const [upload, setUpload] = useState(null);
@@ -14,20 +20,36 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
     const [verifyingProfession, setVerifyingProfession] = useState(false);
     const [uploads, setUploads] = useState([]);
     const [certificates, setCertificates] = useState([]);
-
-    const enableCerts = user.account_type === 'PROFESSIONAL' ? true : false;
+    const [loading, setLoading] = useState(true);
 
     const axiosConfig = {
         headers: {
-            'authorization': 'bearer ' + token
+            'authorization': 'bearer ' + admin.token
         }
     }
 
     useEffect(() => {
-        getUploads();
-        getCertificates();
+        getUser();
     }, [])
 
+    useEffect(() => {
+        if (user) {
+            getUploads();
+            getCertificates();
+        }
+    }, [user])
+
+    const getUser = async () => {
+        try {
+            let user = await getUserById(admin.token, props.match.params.iduser);
+            setUser(user);
+        } catch (error) {
+            alert("Cannot get user information: " + error)
+        } finally {
+            setLoading(false)
+        }
+    }
+ 
     const getUploads = () => {
         axios.get(`${URL}/admin/getuploads?iduser=${user.iduser}`, axiosConfig)
             .then((res) => {
@@ -78,7 +100,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                 if (res.data.success) {
                     alert(res.data.success.message);
                     setVerifyingIdentity(false);
-                    selectUser(user.iduser);
+                    getUser();
                 } else if (res.data.error) {
                     alert('Update verification failed: ' + res.data.error.message);
                     setVerifyingIdentity(false);
@@ -101,7 +123,7 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
             .then((res) => {
                 if (res.data.success) {
                     alert(res.data.success.message);
-                    selectUser(user.iduser);
+                    getUser();
                 } else if (res.data.error) {
                     alert('Updating profession verification failed: ' + res.data.error.message);
                 }
@@ -114,14 +136,28 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
             })
     }
 
+    if (loading) {
+        return (
+            <Loader />
+        )
+    }
+
+    if (!user) {
+        return (
+            <div className="text-center my-4 py-4">
+                <h3>Oops... Something went wrong!</h3>
+            </div>
+        )
+    }
+
     return (
         <div>
             <Modal appElement={document.getElementById('modal')} isOpen={modalOpen}>
                 {
                     modalPurpose === 'REVIEW_UPLOAD' ?
-                        <ReviewUpload setModalOpen={setModalOpen} token={token} upload={upload} getUploads={getUploads} /> :
+                        <ReviewUpload setModalOpen={setModalOpen} token={admin.token} upload={upload} getUploads={getUploads} /> :
                         modalPurpose === 'ADD_CERT' ?
-                            <AddCertificate setModalOpen={setModalOpen} token={token} getCertificates={getCertificates} user={user} /> :
+                            <AddCertificate setModalOpen={setModalOpen} token={admin.token} getCertificates={getCertificates} user={user} /> :
                             <div className="row justify-content-center text-center py-4 px-4 mt-5">
                                 <div className="col-10">
                                     <h5>No content to show</h5>
@@ -135,7 +171,6 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
             <div className="row">
                 <div className="col-12 py-3 my-1 text-center text-muted">
                     <h2>Account Details For: <span className="text-capitalize">{user.surname}, {user.forenames}</span></h2>
-                    <button onClick={deselectUser} className="btn btn-danger">Close File</button>
                 </div>
             </div>
             <div className="row py-2 mt-4">
@@ -198,8 +233,8 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                     </ul>
                 </div>
             </div>    
-            <div className="row py-2 mt-4 justify-content-center">
-                <div className="col-lg-6 col-md-8 col-sm-10">
+            <div className="row py-2 mt-4">
+                <div className="col-md-6 col-sm-12">
                     <h4>Actions</h4>
                     <ul className="list-group list-group-flush">
                         <li className="list-group-item">
@@ -249,14 +284,14 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                             }
                             
                             { 
-                                user.identity_verified ?
+                                user.profession_verified ?
                                 "If you want to revoke profession verification click this button" :
                                 "If you have reviewed a Certificate/Licence and added one below then click to verify"
                             }
                         </li>
                         <li className="list-group-item">
                             <button
-                                disabled={!enableCerts}
+                                disabled={user.account_type === 'PROFESSIONAL' ? false : true}
                                 onClick={
                                     () => {
                                         setModalPurpose('ADD_CERT');
@@ -267,6 +302,10 @@ const UserDetails = ({token, user, selectUser, deselectUser}) => {
                             Add after reviewing relevant uploads
                         </li>
                     </ul>
+                </div>
+                <div className="col-md-6 col-sm-12">
+                    <h4>Adminstrative tasks</h4>
+                    <AdminTasks token={admin.token} iduser={user.iduser} />
                 </div>
             </div>
         </div>

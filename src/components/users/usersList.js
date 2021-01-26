@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const UsersList = ({rows, selectUser}) => {
+const UsersList = ({rows}) => {
     return (
         <table className="table">
             <thead>
@@ -24,7 +25,7 @@ const UsersList = ({rows, selectUser}) => {
                                     Identity: {row.identity_verified ? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>}<br />
                                     Profession: {row.account_type === 'PROFESSIONAL' ? (row.profession_verified? <span className="text-success font-weight-bold">YES</span> : <span className="text-danger font-weight-bold">NO</span>) : 'N/A'}
                                 </td>
-                                <td><button onClick={() => selectUser(row.iduser)} className="btn btn-info">View Details</button></td>
+                                <td><Link to={`/userdetails/${row.iduser}`} target={"_blank"} className="btn btn-info">View Details</Link></td>
                             </tr>
                         )
                     })

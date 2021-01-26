@@ -1,15 +1,13 @@
 import React, { useContext, useState } from 'react';
 import { UserContext } from '../../context/userContext';
-import axios from 'axios';
+import axios from '../../functions/axios';
 import { URL } from '../../variables';
 import UsersList from './usersList';
-import UserDetails from './userDetails';
 
 const Users = () => {
     const user = useContext(UserContext);
     const [usersList, setUsersList] = useState([]);
     const [pages, setPages] = useState({ init: false, page: 1, limit: 20, prev: false, next: false})
-    const [selectedUser, setSelectedUser] = useState(null);
     const [search, setSearch] = useState('');
     const [checkbox, setCheckbox] = useState({ unverified: true, professional: false});
     const [submitValue, setSubmitValue] = useState('Show all');
@@ -75,34 +73,7 @@ const Users = () => {
         fetchUsers(pages.page - 1, pages.limit, checkbox.professional, checkbox.unverified, search);
     }
 
-    const selectUser = (userId) => {
-        let queryString = '?iduser=' + userId;
-
-        const config = {
-            headers: {
-                'authorization': 'bearer ' + user.token
-            }
-        }
-
-        axios.get(`${URL}/admin/fetchuser${queryString}`, config)
-            .then(res => {
-                if (res.data.user) {
-                    setSelectedUser(res.data.user)
-                } else {
-                    alert(res.data.error)
-                }
-            })
-            .catch(error => {
-                alert(error)
-            })
-    }
-
-    const deselectUser = () => {
-        setSelectedUser(null);
-    }
-
     return (
-        selectedUser ? <UserDetails token={user.token} user={selectedUser} selectUser={selectUser} deselectUser={deselectUser} /> :
         <div>
             <div className="row">
                 <div className="col-12 py-3 my-1 text-center text-muted">
@@ -138,7 +109,7 @@ const Users = () => {
             </div>    
             <div className="row justify-content-center">
                 <div className="col-lg-8 col-md-12 col-sm-12 my-3">
-                    <UsersList rows={usersList} selectUser={selectUser} />
+                    <UsersList rows={usersList} />
                     {
                         pages.init? 
                         <div className="text-center">

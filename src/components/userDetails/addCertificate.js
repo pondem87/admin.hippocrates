@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../functions/axios';
 import { URL } from '../../variables';
 
 const AddCertificate = ({setModalOpen, token, getCertificates, user}) => {
@@ -30,8 +30,6 @@ const AddCertificate = ({setModalOpen, token, getCertificates, user}) => {
             .then((res) => {
                 if (res.data.uploads) {
                     setUploads(res.data.uploads);
-                    //select first upload as default on select box
-                    if (res.data.uploads.length > 1) setForm(prev => ({ ...prev, iduploads: res.data.uploads[0].iduploads }));
                 } else if (res.data.error) {
                     alert('Failed to get uploads: ' + res.data.error.message);
                 }
@@ -44,7 +42,9 @@ const AddCertificate = ({setModalOpen, token, getCertificates, user}) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        if (form.iduploads === '') {
+        if (uploads.length === 1) {
+            form.iduploads = uploads[0].iduploads
+        } else if (form.iduploads === '') {
             alert("Please select a supporting document");
             return;
         }

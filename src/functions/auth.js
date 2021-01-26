@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { URL } from '../variables'
+import axios from './axios';
+import { URL } from '../variables';
 
 //login function
 export const loginFunc = (login, setErrorState, done, values) => {
@@ -7,7 +7,6 @@ export const loginFunc = (login, setErrorState, done, values) => {
         .then((res) => {
             if (res.data.token) {
                 //login successful
-                localStorage.setItem('jwt', res.data.token);
                 login(res.data);
                 done();
             } else if (res.data.error) {
@@ -31,6 +30,28 @@ export const loginFunc = (login, setErrorState, done, values) => {
         });
 }
 
+//check saved token
+export const checkToken = (token) => {
+    return new Promise((resolve, reject) => {
+        const config = {
+            headers: {
+                'authorization': 'bearer ' + token
+            }
+        }
+
+        axios.get(`${URL}/admin/getuserobject`, config)
+            .then((result) => {
+                if (result.data.token) {
+                    resolve(result.data)
+                } else {
+                    reject(result.data.error ? result.data.error.message : "Unknown error")
+                }
+            })
+            .catch((error) => {
+                reject("Network error")
+            })
+    })
+}
 
 //reset password function
 export const ResetPasswordFunc = (email) => {

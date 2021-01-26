@@ -1,1 +1,1 @@
-export const URL = 'https://api.hippocratesalliance.com';
+export const URL = 'http://localhost:8080';

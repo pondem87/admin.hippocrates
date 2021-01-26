@@ -9,6 +9,7 @@ const UserContextProvider = (props) => {
     });
 
     const login = (data) => {
+        localStorage.setItem('jwt', data.token);
         setState({
             ...data,
             signedIn: true
@@ -16,6 +17,7 @@ const UserContextProvider = (props) => {
     }
 
     const logout = () => {
+        localStorage.removeItem('jwt');
         setState({
             token: null,
             signedIn: false,
