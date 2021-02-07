@@ -11,6 +11,8 @@ import UserDetails from './components/userDetails/userDetails';
 import Loader from './components/shared/loader';
 import { UserContext } from './context/userContext';
 import { checkToken } from './functions/auth';
+import Requests from './components/requests/requests';
+import Services from './components/services/services';
 
 function App() {
   const {login, logout} = useContext(UserContext);
@@ -52,6 +54,8 @@ function App() {
             <Route path="/reset" component={Reset} />
             <ProtectedRoute path='/users' component={Users} />
             <ProtectedRoute path='/userdetails/:iduser' component={UserDetails} />
+            <ProtectedRoute path='/requests' component={Requests} />
+            <ProtectedRoute path='/services' component={Services} />
             <ProtectedRoute component={Home} />
           </Switch>
         </div>
