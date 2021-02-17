@@ -82,7 +82,7 @@ const Users = () => {
                 </div>
             </div>
             <div className="row justify-content-center">
-                <div className="col-lg-6 col-md-8 col-sm-10">
+                <div className="col-lg-8 col-md-10 col-sm-12">
                     <h4>Choose which users to display</h4>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
@@ -108,7 +108,7 @@ const Users = () => {
                 </div>
             </div>    
             <div className="row justify-content-center">
-                <div className="col-lg-8 col-md-12 col-sm-12 my-3">
+                <div className="col-lg-10 col-md-12 col-sm-12 my-3">
                     <UsersList rows={usersList} />
                     {
                         pages.init? 

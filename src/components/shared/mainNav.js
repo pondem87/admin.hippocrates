@@ -15,8 +15,10 @@ const MainNav = ({logout}) => {
                     <ul className="navbar-nav">
                         <li className="nav-item"><Link to="/" className="nav-link">Home</Link></li>
                         <li className="nav-item"><Link to="/users" className="nav-link">Users</Link></li>
+                        <li className="nav-item"><Link to="/uploads" className="nav-link">Uploads</Link></li>
                         <li className="nav-item"><Link to="/requests" className="nav-link">Requests</Link></li>
                         <li className="nav-item"><Link to="/services" className="nav-link">Services</Link></li>
+                        <li className="nav-item"><Link to="/chat" target={"_blank"} className="nav-link">Chat</Link></li>
                     </ul>
                 </div>
 

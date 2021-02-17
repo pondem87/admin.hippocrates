@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { UserContext } from '../../context/userContext';
-import axios from 'axios';
+import axios from '../../functions/axios';
 import { URL } from '../../variables';
 import Loader from '../shared/loader';
 
